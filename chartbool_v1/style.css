@@ -13,6 +13,7 @@ li {
   list-style-type: none;
 }
 
-#myLineChart {
-  width: 800px;
+#doughnutChart {
+  width: 200px;
+  height: 200px;
 }
