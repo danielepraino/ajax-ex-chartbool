@@ -13,7 +13,12 @@ li {
   list-style-type: none;
 }
 
-#doughnutChart {
-  width: 200px;
-  height: 200px;
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.linechart-container, .doughnutchart-container {
+  width: 600px;
+  height: 600px;
 }

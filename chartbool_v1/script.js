@@ -5,6 +5,7 @@ var totalSales = {};
 var singleSales = {};
 var dataTotalSales = [];
 var dataSingleSales = [];
+var labelTotalSales = [];
 var labelSingleSales = [];
 var allSales = 0;
 
@@ -37,9 +38,9 @@ function call_API(){
       labelSingleSales = Object.keys(singleSales);
       dataTotalSales = Object.values(totalSales);
       for (var j = 0; j < 4; j++) {
-        dataSingleSales.push(Math.ceil((Object.values(singleSales)[j]) / allSales * 100));
+        dataSingleSales.push(Math.round(((Object.values(singleSales)[j]) / allSales) * 1000) / 10);
       }
-      console.log(dataSingleSales);
+      console.log("dataSingleSales: " + dataSingleSales);
       console.log(labelSingleSales);
       console.log(obj);
     },
@@ -49,29 +50,28 @@ function call_API(){
   });
 }
 
-call_API();
-
-//var ctx = document.getElementById("lineChart").getContext("2d");
+var ctx = document.getElementById("lineChart").getContext("2d");
 var ctx2 = document.getElementById("doughnutChart").getContext("2d");
 
-// var lineChart = new Chart(ctx, {
-//     type: 'line',
-//     data: {
-//         labels: [labelTotalSales],
-//         datasets: [{
-//             data: [10, 20],
-//         }]
-//     },
-//     options: ""
-// });
+var lineChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labelTotalSales,
+    datasets: [{
+        data: dataTotalSales,
+    }]
+  }
+});
 
 var doughnutChart = new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: dataSingleSales,
-        }],
-        labels: labelSingleSales,
-    },
-    options: ""
+  type: 'doughnut',
+  data: {
+    labels: labelSingleSales,
+    datasets: [{
+      data: dataSingleSales,
+      backgroundColor: ["#f1c40f", "#2ecc71", "#3498db", "#e74c3c"]
+    }]
+  }
 });
+
+call_API();
