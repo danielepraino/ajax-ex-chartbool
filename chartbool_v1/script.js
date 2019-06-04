@@ -13,8 +13,7 @@ var myLineChart = new Chart(ctx, {
     options: ""
 });
 
-function call_TodoAPI(){
-  $(".todo").empty();
+function call_API(){
   $.ajax({
     url: apiURL,
     method: "GET",
@@ -45,4 +44,4 @@ function call_TodoAPI(){
   });
 }
 
-call_TodoAPI();
+call_API();
