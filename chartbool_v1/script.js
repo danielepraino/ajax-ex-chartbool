@@ -1,13 +1,27 @@
 moment.locale("it");
 
 var apiURL = "http://157.230.17.132:4014/sales/";
-var totalSales = {};
 var singleSales = {};
 var dataTotalSales = [];
 var dataSingleSales = [];
 var labelTotalSales = [];
 var labelSingleSales = [];
 var allSales = 0;
+
+var months = {
+  gennaio: 0,
+  febbraio: 0,
+  marzo: 0,
+  aprile: 0,
+  maggio: 0,
+  giugno: 0,
+  luglio: 0,
+  agosto: 0,
+  settembre: 0,
+  ottobre: 0,
+  novembre: 0,
+  dicembre: 0
+};
 
 function call_API(){
   $.ajax({
@@ -17,17 +31,16 @@ function call_API(){
     },
     success: function(obj){
       for (var i = 0; i < obj.length; i++) {
-        var formattedData = moment(obj[i].date, "DD/MM/YYYY").format("YYYY/MM/DD");
-        var currentMonth = moment(formattedData).month();
+        var formattedData = moment(obj[i].date, "DD/MM/YYYY");
+        var currentMonth = formattedData.format("MMMM");
+        console.log(currentMonth);
+        months[currentMonth] += employeeSale;
+        console.log(months);
         var employee = obj[i].salesman;
         var employeeSale = obj[i].amount;
-        var months = Object.keys(totalSales);
+
+        //grafico vendite venditori
         var men = Object.keys(singleSales);
-        if (!months.includes(currentMonth)) {
-          totalSales[currentMonth] = employeeSale;
-        } else {
-          totalSales[currentMonth] += employeeSale;
-        }
         if (!men.includes(employee)) {
           singleSales[employee] = employeeSale;
         } else {
@@ -36,13 +49,16 @@ function call_API(){
         allSales += employeeSale;
       }
       labelSingleSales = Object.keys(singleSales);
-      dataTotalSales = Object.values(totalSales);
-      for (var j = 0; j < 4; j++) {
-        dataSingleSales.push(Math.round(((Object.values(singleSales)[j]) / allSales) * 1000) / 10);
+      labelTotalSales = Object.keys(months);
+      dataTotalSales = Object.values(months);
+      if (allSales > 0) {
+        for (var employee in singleSales) {
+          dataSingleSales.push(((singleSales[employee] / allSales) * 100).toFixed(1));
+        }
       }
-      console.log("dataSingleSales: " + dataSingleSales);
-      console.log(labelSingleSales);
       console.log(obj);
+      drawLineChart(labelTotalSales, dataTotalSales);
+      drawDoughnutChart(labelSingleSales, dataSingleSales);
     },
     error: function() {
       alert("errore");
@@ -50,28 +66,37 @@ function call_API(){
   });
 }
 
-var ctx = document.getElementById("lineChart").getContext("2d");
-var ctx2 = document.getElementById("doughnutChart").getContext("2d");
+function drawLineChart(label, data) {
+  var ctx = document.getElementById("lineChart").getContext("2d");
+  var lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labelTotalSales,
+      datasets: [{
+          data: dataTotalSales,
+      }]
+    }
+  });
+}
 
-var lineChart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: labelTotalSales,
-    datasets: [{
-        data: dataTotalSales,
-    }]
-  }
-});
-
-var doughnutChart = new Chart(ctx2, {
-  type: 'doughnut',
-  data: {
-    labels: labelSingleSales,
-    datasets: [{
-      data: dataSingleSales,
-      backgroundColor: ["#f1c40f", "#2ecc71", "#3498db", "#e74c3c"]
-    }]
-  }
-});
+function drawDoughnutChart(label, data) {
+  var ctx2 = document.getElementById("doughnutChart").getContext("2d");
+  var doughnutChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: label,
+      datasets: [{
+        data: data,
+        backgroundColor: ["#f1c40f", "#2ecc71", "#3498db", "#e74c3c"]
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Vendite per singoli venditori nel 2017"
+      }
+    }
+  });
+}
 
 call_API();
