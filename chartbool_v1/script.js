@@ -2,7 +2,6 @@ moment.locale("it");
 
 var apiURL = "http://157.230.17.132:4014/sales/";
 var singleSales = {};
-var workForce = {};
 var dataTotalSales = [];
 var dataSingleSales = [];
 var labelTotalSales = [];
@@ -28,6 +27,10 @@ var months = {
   dicembre: 0
 };
 
+var optionMonth = {
+  value: ""
+}
+
 function dataSalesPerMonth(obj) {
   for (var i = 0; i < obj.length; i++) {
     var formattedData = moment(obj[i].date, "DD/MM/YYYY");
@@ -38,13 +41,21 @@ function dataSalesPerMonth(obj) {
   }
   labelTotalSales = Object.keys(months);
   dataTotalSales = Object.values(months);
+  for (var j = 0; j < Object.keys(months).length; j++) {
+    optionMonth.value = Object.keys(months)[j];
+    $(".months").append(selectTemplate(optionMonth));
+  }
+}
+
+var optionEmployees = {
+  value: ""
 }
 
 function dataSalesPerEmployee(obj) {
   for (var i = 0; i < obj.length; i++) {
     var employee = obj[i].salesman;
     var employeeSale = obj[i].amount;
-    workForce = Object.keys(singleSales);
+    var workForce = Object.keys(singleSales);
     if (!workForce.includes(employee)) {
       singleSales[employee] = employeeSale;
     } else {
@@ -56,8 +67,8 @@ function dataSalesPerEmployee(obj) {
   if (allSales > 0) {
     for (var employee in singleSales) {
       dataSingleSales.push(((singleSales[employee] / allSales) * 100).toFixed(1));
-      $(".employees").append(selectTemplate(workForce));
-      console.log(workForce);
+      optionEmployees.value = employee;
+      $(".employees").append(selectTemplate(optionEmployees));
     }
   }
 }
@@ -80,6 +91,8 @@ function call_API(){
     }
   });
 }
+
+
 
 function drawLineChart(label, data) {
   var ctx = document.getElementById("lineChart").getContext("2d");
@@ -130,3 +143,41 @@ function drawDoughnutChart(label, data) {
 }
 
 call_API();
+
+function call_POST_API(){
+  $.ajax({
+    url: apiURL,
+    method: "POST",
+    data: {
+      salesman: employeeValue,
+      amount: saleValue,
+      date: dateValue
+    },
+    success: function(obj){
+      dataSalesPerMonth(obj);
+      dataSalesPerEmployee(obj);
+      console.log(obj);
+      drawLineChart(labelTotalSales, dataTotalSales);
+      drawDoughnutChart(labelSingleSales, dataSingleSales);
+    },
+    error: function() {
+      alert("errore");
+    }
+  });
+}
+
+$(".employees").change(function(){
+  var employeeValue = $(this).val();
+  console.log("employeeValue: " + employeeValue);
+});
+
+$(".months").change(function(){
+  var dateValue = $(this).val();
+  console.log("dateValue: " + dateValue);
+});
+
+$(".add-sales-btn").click(function(){
+  var saleValue = $(".sales-input").val();
+  console.log("saleValue: " + saleValue);
+  $(".sales-input").val("");
+});
