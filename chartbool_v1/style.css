@@ -14,16 +14,30 @@ li {
 }
 
 .container {
+  height: 500px;
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.charts-container {
+  display: flex;
+  margin-right: 100px;
 }
 
 .linechart-container, .doughnutchart-container {
-  width: 600px;
-  height: 600px;
-  margin-top: 50px;
+  background-color: #ecf0f1;
+  border-radius: 10px;
+  margin-right: 50px;
+  padding: 20px;
 }
 
-.linechart-container {
-  margin-right: 100px;
+.interface-container {
+  color: #FFF;
+  background-color: #c0392b;
+  border-radius: 10px;
+  margin-left: 50px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }

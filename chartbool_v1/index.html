@@ -14,13 +14,37 @@
   </head>
   <body>
     <div class="container">
-      <div class="linechart-container">
-        <canvas id="lineChart" width="400" height="400"></canvas>
-      </div>
-      <div class="doughnutchart-container">
-        <canvas id="doughnutChart" width="400" height="400"></canvas>
+      <div class="charts-container">
+        <div class="linechart-container">
+          <canvas id="lineChart" width="400" height="400"></canvas>
+        </div>
+        <div class="doughnutchart-container">
+          <canvas id="doughnutChart" width="400" height="400"></canvas>
+        </div>
+
+        <div class="interface-container">
+          <div class="title">
+            <h1>ChartBool <i class="fas fa-chart-pie"></i></h1>
+          </div>
+          <div class="employees-select">
+            <span class="interface-title">Venditore</span>
+            <select class="employees" name=""></select>
+          </div>
+          <div class="months-select">
+            <span class="interface-title">Mese</span>
+            <select class="months" name=""></select>
+          </div>
+          <div class="sale-input">
+            <input type="text" placeholder="Aggiungi una vendita" value="">
+            <button type="button" name="button"><i class="fas fa-plus"></i> <span>Aggiungi<span></button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <script id="option-template" type="text/x-handlebars-template">
+      <option value="{{value}}">{{value}}</option>
+    </script>
 
     <script src="script.js" charset="utf-8"></script>
   </body>
