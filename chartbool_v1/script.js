@@ -7,6 +7,7 @@ var dataSingleSales = [];
 var labelTotalSales = [];
 var labelSingleSales = [];
 var allSales = 0;
+var employeeValue, dateValue, saleValue;
 
 //setto le variabili per handlebarsjs
 var optionTemplate = $("#option-template").html();
@@ -144,21 +145,23 @@ function drawDoughnutChart(label, data) {
 
 call_API();
 
-function call_POST_API(){
+function call_POST_API(employee, date, sale){
   $.ajax({
     url: apiURL,
     method: "POST",
-    data: {
-      salesman: employeeValue,
-      amount: saleValue,
-      date: dateValue
-    },
+    contentType: 'application/json',
+    data: JSON.stringify({
+      salesman: employee,
+      amount: parseInt(sale),
+      date: date
+    }),
     success: function(obj){
       dataSalesPerMonth(obj);
       dataSalesPerEmployee(obj);
       console.log(obj);
       drawLineChart(labelTotalSales, dataTotalSales);
       drawDoughnutChart(labelSingleSales, dataSingleSales);
+      location.reload();
     },
     error: function() {
       alert("errore");
@@ -167,17 +170,23 @@ function call_POST_API(){
 }
 
 $(".employees").change(function(){
-  var employeeValue = $(this).val();
+  employeeValue = $(this).val();
   console.log("employeeValue: " + employeeValue);
 });
 
 $(".months").change(function(){
-  var dateValue = $(this).val();
+  monthNumber = moment().month($(this).val()).format("MM");
+  dateValue = "14/" + monthNumber + "/2017";
   console.log("dateValue: " + dateValue);
 });
 
 $(".add-sales-btn").click(function(){
-  var saleValue = $(".sales-input").val();
+  saleValue = $(".sales-input").val();
   console.log("saleValue: " + saleValue);
   $(".sales-input").val("");
+  if (!employeeValue || !dateValue || !saleValue) {
+    console.log("ATTENZIONE! Mancano alcuni valori");
+  } else {
+    call_POST_API(employeeValue, dateValue, saleValue);
+  }
 });
