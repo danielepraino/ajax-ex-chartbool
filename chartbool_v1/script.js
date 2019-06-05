@@ -4,8 +4,10 @@ var apiURL = "http://157.230.17.132:4014/sales/";
 var singleSales = {};
 var dataTotalSales = [];
 var dataSingleSales = [];
+var dataQuarterSales = [];
 var labelTotalSales = [];
 var labelSingleSales = [];
+var labelQuarterSales = [];
 var allSales = 0;
 var employeeValue, dateValue, saleValue;
 
@@ -28,15 +30,26 @@ var months = {
   dicembre: 0
 };
 
+var quarter = {
+  Q1: 0,
+  Q2: 0,
+  Q3: 0,
+  Q4: 0
+}
+
 var optionMonth = {
   value: ""
 }
+
+var optionEmployees = {
+  value: ""
+}
+
 
 function dataSalesPerMonth(obj) {
   for (var i = 0; i < obj.length; i++) {
     var formattedData = moment(obj[i].date, "DD/MM/YYYY");
     var currentMonth = formattedData.format("MMMM");
-    var employee = obj[i].salesman;
     var employeeSale = obj[i].amount;
     months[currentMonth] += employeeSale;
   }
@@ -46,10 +59,6 @@ function dataSalesPerMonth(obj) {
     optionMonth.value = Object.keys(months)[j];
     $(".months").append(selectTemplate(optionMonth));
   }
-}
-
-var optionEmployees = {
-  value: ""
 }
 
 function dataSalesPerEmployee(obj) {
@@ -74,6 +83,18 @@ function dataSalesPerEmployee(obj) {
   }
 }
 
+function dataSalesPerQuarter(obj) {
+  for (var i = 0; i < obj.length; i++) {
+    var formattedData = moment(obj[i].date, "DD/MM/YYYY");
+    var currentQuarter = "Q"+formattedData.quarter();
+    console.log("currentQuarter: " + currentQuarter);
+    var employeeSale = obj[i].amount;
+    quarter[currentQuarter] += employeeSale;
+  }
+  labelQuarterSales = Object.keys(quarter);
+  dataQuarterSales = Object.values(quarter);
+}
+
 function call_API(){
   $.ajax({
     url: apiURL,
@@ -83,9 +104,11 @@ function call_API(){
     success: function(obj){
       dataSalesPerMonth(obj);
       dataSalesPerEmployee(obj);
+      dataSalesPerQuarter(obj);
       console.log(obj);
       drawLineChart(labelTotalSales, dataTotalSales);
       drawDoughnutChart(labelSingleSales, dataSingleSales);
+      drawBarChart(labelQuarterSales, dataQuarterSales);
     },
     error: function() {
       alert("errore");
@@ -93,7 +116,31 @@ function call_API(){
   });
 }
 
-
+function call_POST_API(employee, date, sale){
+  $.ajax({
+    url: apiURL,
+    method: "POST",
+    contentType: 'application/json',
+    data: JSON.stringify({
+      salesman: employee,
+      amount: parseInt(sale),
+      date: date
+    }),
+    success: function(obj){
+      dataSalesPerMonth(obj);
+      dataSalesPerEmployee(obj);
+      dataSalesPerQuarter(obj);
+      console.log(obj);
+      drawLineChart(labelTotalSales, dataTotalSales);
+      drawDoughnutChart(labelSingleSales, dataSingleSales);
+      drawBarChart(labelQuarterSales, dataQuarterSales);
+      location.reload();
+    },
+    error: function() {
+      alert("errore");
+    }
+  });
+}
 
 function drawLineChart(label, data) {
   var ctx = document.getElementById("lineChart").getContext("2d");
@@ -115,10 +162,10 @@ function drawLineChart(label, data) {
         text: "Vendite totali nel 2017"
       },
       elements: {
-          line: {
-              tension: 0
-          }
-      }
+        line: {
+            tension: 0,
+        }
+      },
     }
   });
 }
@@ -143,28 +190,23 @@ function drawDoughnutChart(label, data) {
   });
 }
 
-call_API();
-
-function call_POST_API(employee, date, sale){
-  $.ajax({
-    url: apiURL,
-    method: "POST",
-    contentType: 'application/json',
-    data: JSON.stringify({
-      salesman: employee,
-      amount: parseInt(sale),
-      date: date
-    }),
-    success: function(obj){
-      dataSalesPerMonth(obj);
-      dataSalesPerEmployee(obj);
-      console.log(obj);
-      drawLineChart(labelTotalSales, dataTotalSales);
-      drawDoughnutChart(labelSingleSales, dataSingleSales);
-      location.reload();
+function drawBarChart(label, data) {
+  var ctx3 = document.getElementById("barChart").getContext("2d");
+  var barChart = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: label,
+      datasets: [{
+        label: ["Trimestre"],
+        data: data,
+        backgroundColor: ["#f1c40f", "#2ecc71", "#3498db", "#e74c3c"]
+      }]
     },
-    error: function() {
-      alert("errore");
+    options: {
+      title: {
+        display: true,
+        text: "Vendite per trimestri"
+      }
     }
   });
 }
@@ -190,3 +232,5 @@ $(".add-sales-btn").click(function(){
     call_POST_API(employeeValue, dateValue, saleValue);
   }
 });
+
+call_API();
